@@ -21,7 +21,7 @@ searchYear = "20"
 searchMonth = "09"
 
 for dd in range(1, 32):
-    datafilename = "d" + searchYear + searchMonth+str(dd).zfill(2) + "e.htm"
+    datafilename = "d" + searchYear + searchMonth+str(dd).zfill(2) + "e.htm"  #"d200918e.htm"
     print(datafilename)
     try:
         url = hkexpath + datafilename
