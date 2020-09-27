@@ -15,7 +15,7 @@ Income/Expenses:
 50%/50% share for founders
 
 Target Release Date:
-2021-04-01
+2021-03-31
 
 License:
 prefer MIT license, to be confirmed
