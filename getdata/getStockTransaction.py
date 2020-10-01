@@ -8,7 +8,7 @@ import os
 import urllib3
 import shutil
 import pathlib
-
+import datetime
 
 def getStockDailyQuotations(localpath, urlpath, datafilename):
     result = False
@@ -31,16 +31,40 @@ def getStockDailyQuotations(localpath, urlpath, datafilename):
             print("    Save File.")
             shutil.copyfileobj(r, out)
 
+def getStockDaily(localpath, urlpath, sYear, sMonth):
+    now = datetime.datetime.now()
+    #print(now.year)
+    #print(now.month)
+    #print(now.day)
+    
+    endDay = 32
+    if (sYear == now.year):
+        if (sMonth == now.month):
+            endDay = now.day + 1
+    
+    for dd in range(1,endDay):
+        datafilename = "d" + str(sYear-2000) + str(sMonth).zfill(2) + str(dd).zfill(2) + "e.htm"
+        print(datafilename)
+        getStockDailyQuotations(localfolder,hkexpath,datafilename)
+        
 
 if __name__ == '__main__':   
     hkexpath = "https://www.hkex.com.hk/eng/stat/smstat/dayquot/"
     localfolder = "dailyQuotations"
     
-    datafilename = "d200918e.htm"
+    #datafilename = "d200918e.htm"
     
-    getStockDailyQuotations(localfolder,hkexpath,datafilename)
+    getStockDaily(localfolder,hkexpath,2019,3)
+    
+    """
+    searchYear = "20"
+    searchMonth = "09"
+    for dd in range(1, 5):
+        datafilename = "d" + searchYear + searchMonth+str(dd).zfill(2) + "e.htm"
+        print(datafilename)
+        getStockDailyQuotations(localfolder,hkexpath,datafilename)
 
-
+"""
 
 """
 hkexpath = "https://www.hkex.com.hk/eng/stat/smstat/dayquot/"
