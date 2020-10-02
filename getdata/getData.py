@@ -8,5 +8,8 @@ Created on Thu Oct  1 16:00:33 2020
 import googleDriveApi as drive
 
 
-drive.main_search_upload("d200902e.htm")
 
+
+
+if __name__ == '__main__':
+    drive.main_search_upload("d200902e.htm")
