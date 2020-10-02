@@ -12,6 +12,7 @@ from googleapiclient.http import MediaIoBaseDownload
 from tabulate import tabulate
 import requests
 from tqdm import tqdm
+import datetime
 
 # If modifying these scopes, delete the file token.pickle.
 # SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
@@ -222,29 +223,70 @@ def main_search():
     table = tabulate(search_result, headers=["ID", "Name", "Type"])
     print(table)
     
-def main_search_upload(filename):
+def main_search_upload(foldername, filename):
     result=False
     filetype = "text/html"
     service = get_gdrive_service()
+    
     # search for the file by name, [0] just store an "dummy", 
-    search_result = search(service, query=f"name='{filename}'")
+    search_result = search(service, query=f"name='{foldername}'")
     #print(len(search_result))
     
     if (len(search_result) > 1):
         # get the GDrive ID of the file
-        file_id = search_result[1][0]
-        print(filename)
-        print(file_id)
-        result= True
+        folder_id = search_result[1][0]
+        #print(foldername)
+        #print(folder_id)
+        
+        # search for the file by name, [0] just store an "dummy", 
+        search_result = search(service, query=f"name='{filename}'")
+        if (len(search_result) > 1):
+            print("File exist")
+        else:        
+            # upload a file 
+            # first, define file metadata, such as the name and the parent folder ID
+            file_metadata = {
+                "name": filename,
+                "parents": [folder_id]
+                }
+            localpathfilename = foldername+"/"+filename
+            # upload
+            try:
+                media = MediaFileUpload(localpathfilename, resumable=True)
+                file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                print("File created, id:", file.get("id"))
+                result = True  
+            except:
+                result = False
     else:
-        print("file not found")
+        print("Folder not found")
+        result= False
+        
             
-
+    return result
+   
+def uploadStockFiles(foldername, sYear, sMonth):
+    now = datetime.datetime.now()
+    endDay = 32
+    if (sYear == now.year):
+        if (sMonth == now.month):
+            endDay = now.day + 1
+    for dd in range(1,endDay):
+        datafilename = "d" + str(sYear-2000) + str(sMonth).zfill(2) + str(dd).zfill(2) + "e.htm"
+        print(datafilename)
+        main_search_upload(foldername, datafilename)
+    
     
 if __name__ == '__main__':
    #main()
    #main_search()
    #upload_files()
    #download()
-   main_search_upload("d200902e.htm")
-    
+   #main_search_upload("d200901e.htm")
+   main_search_upload("dailyQuotations","d201001e.htm")
+   #list_files()
+   """
+   for mm in range (1,13):
+       uploadStockFiles("dailyQuotations",2020,mm)
+   """
+   
