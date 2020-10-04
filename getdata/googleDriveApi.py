@@ -13,6 +13,7 @@ from tabulate import tabulate
 import requests
 from tqdm import tqdm
 import datetime
+import pathlib
 
 # If modifying these scopes, delete the file token.pickle.
 # SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
@@ -223,13 +224,13 @@ def main_search():
     table = tabulate(search_result, headers=["ID", "Name", "Type"])
     print(table)
     
-def main_search_upload(foldername, filename):
+def main_search_upload(folder_name, date_folder, file_name):
     result=False
     filetype = "text/html"
     service = get_gdrive_service()
     
     # search for the file by name, [0] just store an "dummy", 
-    search_result = search(service, query=f"name='{foldername}'")
+    search_result = search(service, query=f"name='{date_folder}'")
     #print(len(search_result))
     
     if (len(search_result) > 1):
@@ -237,54 +238,88 @@ def main_search_upload(foldername, filename):
         folder_id = search_result[1][0]
         #print(foldername)
         #print(folder_id)
-        
-        # search for the file by name, [0] just store an "dummy", 
-        search_result = search(service, query=f"name='{filename}'")
-        if (len(search_result) > 1):
-            print("File exist")
-        else:        
-            # upload a file 
-            # first, define file metadata, such as the name and the parent folder ID
-            file_metadata = {
-                "name": filename,
-                "parents": [folder_id]
-                }
-            localpathfilename = foldername+"/"+filename
-            # upload
-            try:
-                media = MediaFileUpload(localpathfilename, resumable=True)
-                file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                print("File created, id:", file.get("id"))
-                result = True  
-            except:
-                result = False
     else:
-        print("Folder not found")
-        result= False
-        
+         # folder is not set, create a folder at "dailyQuotations"
+         search_result = search(service, query=f"name='{folder_name}'")
+         pfolder_id = search_result[1][0]
+         
+         pfolder_metadata = {
+             "name": [date_folder],
+             "parents": [pfolder_id],
+             "mimeType": "application/vnd.google-apps.folder"
+             }
+         # create the folder
+         file = service.files().create(body=pfolder_metadata, fields="id").execute()
+         # get the folder id
+         folder_id = file.get("id")
+         print("Folder ID:", folder_id)
+    
+
+
+    # search for the file by name, [0] just store an "dummy", 
+    search_result = search(service, query=f"name='{file_name}'")
+    if (len(search_result) > 1):
+        #print("File exist")
+        pass
+    else:        
+        # upload a file 
+        # first, define file metadata, such as the name and the parent folder ID
+        file_metadata = {
+            "name": file_name,
+            "parents": [folder_id]
+            }
+        localpathfilename = folder_name + "/" + date_folder + "/" + file_name
+        # upload
+        try:
+            media = MediaFileUpload(localpathfilename, resumable=True)
+            file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+            print("File created, id:", file.get("id"))
+            result = True  
+        except:
+            result = False
+    
             
     return result
    
 def uploadStockFiles(foldername, sYear, sMonth):
     now = datetime.datetime.now()
+    #localfolder = foldername + "/" + str(sYear) + str(sMonth).zfill(2)
+    datefolder = str(sYear) + str(sMonth).zfill(2)
     endDay = 32
     if (sYear == now.year):
         if (sMonth == now.month):
             endDay = now.day + 1
     for dd in range(1,endDay):
         datafilename = "d" + str(sYear-2000) + str(sMonth).zfill(2) + str(dd).zfill(2) + "e.htm"
+        csvfilename = datafilename[0:-4] +"t.csv"
         print(datafilename)
-        main_search_upload(foldername, datafilename)
+        localfilename = foldername + "/" + datefolder + "/" + datafilename
+        file = pathlib.Path(localfilename)
+        if file.exists():
+            print("    File exist, process to upload source file")
+            main_search_upload(foldername, datefolder, datafilename)
+            
+        localfilename = foldername + "/" + datefolder + "/" + csvfilename 
+        file = pathlib.Path(localfilename)
+        if file.exists():
+            print("    File exist, process to upload csv file")
+            main_search_upload(foldername, datefolder, csvfilename)
     
     
 if __name__ == '__main__':
+    
+   localfolder = "dailyQuotations"
    #main()
    #main_search()
    #upload_files()
    #download()
    #main_search_upload("d200901e.htm")
-   main_search_upload("dailyQuotations","d201001e.htm")
+   #main_search_upload("dailyQuotations","d201001e.htm")
    #list_files()
+   
+   #checking files, say:  from: localfolder/yyyymm/d200901e.htm
+   uploadStockFiles(localfolder,2020,9)
+   
    """
    for mm in range (1,13):
        uploadStockFiles("dailyQuotations",2020,mm)

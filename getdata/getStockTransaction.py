@@ -2,7 +2,7 @@
 """
 Created on Mon Sep 21 11:04:51 2020
 
-@author: lawre
+@author: lawrence
 """
 import os
 import urllib3
@@ -10,26 +10,46 @@ import shutil
 import pathlib
 import datetime
 
-def getStockDailyQuotations(localpath, urlpath, datafilename):
-    result = False
+def getStockDailyQuotations(lpath, lfolder, urlpath, datafilename):
+    #result = False
     localFileValid = False
     url = urlpath + datafilename
-    localfilename = localpath + "/" + datafilename
+    localfolder = lpath + "/" + lfolder
+    localfilename = localfolder + "/" + datafilename
+    
+    if (os.path.exists(localfolder)):
+        pass
+    else:
+        try:
+            os.mkdir(localfolder)
+        except OSError:
+            print("Creation of the directory %s failed " % localfolder)
+        else:
+            print("Successfully created the directory %s " % localfolder)
+    
     file = pathlib.Path(localfilename)
     if file.exists():
         print("    File exist")
         file_info = os.stat(localfilename)
-        print(file_info.st_size)
+        #print(file_info.st_size)
         localFileSize = file_info.st_size
         if (localFileSize > 10000):
             localFileValid = True
+            
     if (localFileValid == False):
         print("    Get File ...")
         http = urllib3.PoolManager()
-        with open(localfilename, 'wb') as out:
-            r = http.request('GET', url, preload_content=False)
+        r = http.request('GET', url, preload_content=False)
+        r_length = int(r.headers['Content-Length'])
+        print(r_length)
+        if (r_length > 10000):
             print("    Save File.")
-            shutil.copyfileobj(r, out)
+            with open(localfilename, 'wb') as out:           
+                shutil.copyfileobj(r, out)
+        else:
+            print("    File with no data, skip!")
+            
+    
 
 def getStockDaily(localpath, urlpath, sYear, sMonth):
     now = datetime.datetime.now()
@@ -45,7 +65,8 @@ def getStockDaily(localpath, urlpath, sYear, sMonth):
     for dd in range(1,endDay):
         datafilename = "d" + str(sYear-2000) + str(sMonth).zfill(2) + str(dd).zfill(2) + "e.htm"
         print(datafilename)
-        getStockDailyQuotations(localfolder,hkexpath,datafilename)
+        childfolder = str(sYear) + str(sMonth).zfill(2)
+        getStockDailyQuotations(localpath, childfolder, urlpath, datafilename)
         
 
 if __name__ == '__main__':   
@@ -54,7 +75,12 @@ if __name__ == '__main__':
     
     #datafilename = "d200918e.htm"
     
-    getStockDaily(localfolder,hkexpath,2019,3)
+    # get year-month of transaction data from hkex
+    getStockDaily(localfolder,hkexpath,2020,9)
+    
+    
+    
+    
     
     """
     searchYear = "20"

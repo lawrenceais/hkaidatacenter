@@ -5,7 +5,10 @@ Created on Fri Oct  2 20:55:13 2020
 @author: lawre
 """
 
+import os
 from bs4 import BeautifulSoup
+import pathlib
+import datetime
 
 def check_if_string_in_file(file_name, string_to_search):
     """ Check if any line in the file contains given string """
@@ -293,16 +296,47 @@ def getTransactions(folder_name, file_name):
             f1.write(result)
             
     
+def convertCSV(foldername, sYear, sMonth):
+    now = datetime.datetime.now()
+    endDay = 32
+    if (sYear == now.year):
+        if (sMonth == now.month):
+            endDay = now.day + 1
     
+    for dd in range(1,endDay):
+        datafilename = "d" + str(sYear-2000) + str(sMonth).zfill(2) + str(dd).zfill(2) + "e.htm"
+        print(datafilename)
+        datefolder = str(sYear) + str(sMonth).zfill(2)
+        localfolder = foldername + "/" + datefolder
+        localfilename = localfolder + "/" + datafilename
+        file = pathlib.Path(localfilename)
+        if file.exists():
+            print("    File exist, process to conversion")
+            csvfilename = localfolder + "/" + datafilename[0:-4] +"t.csv"
+            file_csv = pathlib.Path(csvfilename)
+            if file_csv.exists():
+                pass
+            else:
+                convertToText(localfolder,datafilename)      #file converted to d190506e.txt
+                getSaleRecords(localfolder,datafilename)     #file converted to d190506es.txt
+                getTransactions(localfolder,datafilename)    #file converted to d190506et.csv
+                
+                file_t = localfolder + "/" + datafilename[0:-4]+".txt"            
+                if os.path.isfile(file_t):
+                    os.remove(file_t)
+                    
+                file_t = localfolder + "/" + datafilename[0:-4] +"s.txt" 
+                if os.path.isfile(file_t):
+                    os.remove(file_t)
+            
     
 if __name__ == '__main__':
     
     folder = "dailyQuotations"
     file = "d190506e.htm"
     
-    convertToText(folder,file)      #file converted to d190506e.txt
-    getSaleRecords(folder,file)     #file converted to d190506es.txt
-    getTransactions(folder,file)
+    convertCSV(folder, 2020, 9)
+    
     
 
 
