@@ -10,28 +10,28 @@ import getStockTransaction as hkex
 import convertHtmlText as stext
 import time
 
-
-
-if __name__ == '__main__':
-    
-    t = time.process_time()
-    hkexpath = "https://www.hkex.com.hk/eng/stat/smstat/dayquot/"
-    localfolder = "dailyQuotations"
-    
-    
-    mYear = 2020
-    mMonth = 10
+def getSingleData(localfolder,hkexpath,mYear,mMonth):
     hkex.getStockDaily(localfolder,hkexpath,mYear,mMonth)
     stext.convertCSV(localfolder, mYear, mMonth)
     drive.uploadStockFiles(localfolder,mYear,mMonth)
-    
-    """
-    mYear = 2019
-    for mm in range (4,7):
-       
+
+def getMultipleData(localfolder,hkexpath,mYear,sMonth, eMonth):
+    for mm in range (sMonth,(eMonth+1)):       
         hkex.getStockDaily(localfolder,hkexpath,mYear,mm)
         stext.convertCSV(localfolder, mYear, mm)
         drive.uploadStockFiles(localfolder,mYear,mm)
-    """
-    elapsed_time = time.process_time() - t
+        
+
+if __name__ == '__main__':
+    
+    tic = time.time()
+    
+    hkex_path = "https://www.hkex.com.hk/eng/stat/smstat/dayquot/"
+    local_folder = "dailyQuotations"
+    
+    getSingleData(local_folder, hkex_path, 2020, 10)
+    #getMultipleData(local_folder, hkex_path, 2019, 1, 6)
+    
+    toc = time.time()
+    elapsed_time = toc - tic
     print(elapsed_time)
