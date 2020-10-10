@@ -5,6 +5,7 @@ Created on Sun Sep 27 17:27:49 2020
 @author: lawre
 """
 
-import OS
+import sqlite3
+import os
 
-x=1
+conn = sqlite3.connect('test.db')
