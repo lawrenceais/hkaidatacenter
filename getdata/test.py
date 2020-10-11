@@ -7,5 +7,15 @@ Created on Sun Sep 27 17:27:49 2020
 
 import sqlite3
 import os
+import datetime
 
-conn = sqlite3.connect('test.db')
+def 
+
+now = datetime.datetime.now()
+database_dir = "../database/"
+database_name = "st" + str(now.year) + str(now.month).zfill(2) +".db"
+database_path = database_dir + database_name
+
+
+conn = sqlite3.connect(database_path)
+
