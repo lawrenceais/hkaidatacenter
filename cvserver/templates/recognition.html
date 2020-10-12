@@ -11,12 +11,11 @@
 <div class="topnav">
   <a href="/">Home</a>
   <a href="/upload">Upload</a>
-  <a href="/result">Result</a>
   <a href="/contact">Contact</a>
 </div>
 
 <div class="content">
-  <h2>Image Recognition Result</h2>
+  <h2>Brand Detection</h2>
 <p>
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}
@@ -30,7 +29,9 @@
 </p>
 {% if filename %}
 	<div>
-		<img src="{{ url_for('display_image', filename=filename) }}">
+		<p class="aligncenter">
+			<img src="{{ url_for('display_image', filename=filename) }}" width="600" >
+		</p>
 	</div>
 {% endif %}
 
