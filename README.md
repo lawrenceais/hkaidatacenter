@@ -8,6 +8,8 @@ Objective:
 Deliver:
 Hosting a website with database for API access
 
+Testing on brand function (2020-10-18)
+
 Domain Name: 
 To be determined
 
